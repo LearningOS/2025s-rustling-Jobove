@@ -27,8 +27,6 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
-
 // Your task is to complete this implementation and return an Ok result of inner
 // type Color. You need to create an implementation for a tuple of three
 // integers, an array of three integers, and a slice of integers.
@@ -41,6 +39,15 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let [red, green, blue]: [Result<u8, _>; 3] = [tuple.0.try_into(), tuple.1.try_into(), tuple.2.try_into()];
+        if red.is_err() || green.is_err() || blue.is_err() {
+            return Err(IntoColorError::IntConversion);
+        }
+        return Ok(Self{
+            red: red.unwrap(),
+            green: green.unwrap(),
+            blue: blue.unwrap(),
+        })
     }
 }
 
@@ -48,6 +55,21 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        let arr: Vec<_> = arr.iter().map(|&x| {
+            let a: Result<u8, _> = x.try_into();
+            a
+        }).filter(|x| x.is_ok()).map(|x| x.unwrap()).collect();
+
+        return if arr.len() != 3 {
+            Err(IntoColorError::IntConversion)
+        } else {
+            let [red, green, blue] = arr[..] else { unreachable!() };
+            Ok(Color {
+                red,
+                green,
+                blue,
+            })
+        }
     }
 }
 
@@ -55,6 +77,25 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        return if slice.len() != 3 {
+            Err(IntoColorError::BadLen)
+        } else {
+            let slice: Vec<_> = slice.iter().map(|&x| {
+                let a: Result<u8, _> = x.try_into();
+                a
+            }).filter(|x| x.is_ok()).map(|x| x.unwrap()).collect();
+
+            return if slice.len() != 3 {
+                Err(IntoColorError::IntConversion)
+            } else {
+                let [red, green, blue] = slice[..] else { unreachable!() };
+                Ok(Color {
+                    red,
+                    green,
+                    blue,
+                })
+            }
+        }
     }
 }
 
