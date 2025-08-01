@@ -69,15 +69,66 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
+    pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self
+    where T : PartialOrd + PartialEq
+    {
+        let mut result = Self {
             length: 0,
             start: None,
             end: None,
+        };
+
+        let mut ptr_a = list_a.start;
+        let mut ptr_b = list_b.start;
+
+        while ptr_a.is_some() && ptr_b.is_some() {
+            let comparison = unsafe { &(*ptr_a.unwrap().as_ptr()).val <= &(*ptr_b.unwrap().as_ptr()).val };
+            let ptr;
+            if comparison {
+                ptr = ptr_a;
+            } else {
+                ptr = ptr_b;
+            }
+
+            unsafe {
+                if result.start.is_none() {
+                    result.start = ptr;
+                } else {
+                    (*result.end.unwrap().as_ptr()).next = ptr;
+                }
+                result.end = ptr;
+
+                if comparison {
+                    ptr_a = (*ptr_a.unwrap().as_ptr()).next;
+                } else {
+                    ptr_b = (*ptr_b.unwrap().as_ptr()).next;
+                }
+
+                (*result.end.unwrap().as_ptr()).next = None;
+            }
         }
-	}
+
+        if ptr_a.is_some() || ptr_b.is_some() {
+            let mut ptr;
+            if ptr_a.is_some() {
+                ptr = ptr_a;
+            } else {
+                ptr = ptr_b;
+            }
+
+            while ptr.is_some() {
+                unsafe {
+                    (*result.end.unwrap().as_ptr()).next = ptr;
+                    result.end = ptr;
+                    ptr = (*ptr.unwrap().as_ptr()).next;
+
+                    (*result.end.unwrap().as_ptr()).next = None;
+                }
+            }
+        }
+
+        result
+    }
 }
 
 impl<T> Display for LinkedList<T>
