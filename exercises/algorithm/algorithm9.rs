@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,28 +36,51 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.count += 1;
+        let mut index = self.count;
+        self.items.push(value);
+
+        while index != 1 {
+            if !(self.comparator)(&self.items[index], &self.items[index / 2]) {
+                break;
+            }
+            self.items.swap(index, index / 2);
+            index /= 2;
+        }
     }
 
-    fn parent_idx(&self, idx: usize) -> usize {
+    fn parent_idx(idx: usize) -> usize {
         idx / 2
     }
 
     fn children_present(&self, idx: usize) -> bool {
-        self.left_child_idx(idx) <= self.count
+        Self::left_child_idx(idx) <= self.count
     }
 
-    fn left_child_idx(&self, idx: usize) -> usize {
+    fn left_child_idx(idx: usize) -> usize {
         idx * 2
     }
 
     fn right_child_idx(&self, idx: usize) -> usize {
-        self.left_child_idx(idx) + 1
+        Self::left_child_idx(idx) + 1
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        if !self.children_present(idx) {
+            return 0;
+        }
+        if self.right_child_idx(idx) > self.count {
+            return Self::left_child_idx(idx);
+        }
+
+        let left = Self::left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+
+        if (self.comparator)(&self.items[left], &self.items[right]) {
+            left
+        } else {
+            right
+        }
     }
 }
 
@@ -84,8 +106,27 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+
+        self.items.swap(1, self.count);
+        let res = self.items.pop();
+        self.count -= 1;
+        let mut index = 1;
+        loop {
+            let this = &self.items[index];
+            let smallest = self.smallest_child_idx(index);
+
+            if smallest == 0 || (self.comparator)(this, &self.items[smallest]) {
+                break;
+            }
+
+            self.items.swap(index, smallest);
+            index = smallest;
+        }
+
+        res
     }
 }
 

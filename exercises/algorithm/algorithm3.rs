@@ -3,11 +3,25 @@
 	This problem requires you to implement a sorting algorithm
 	you can use bubble sorting, insertion sorting, heap sorting, etc.
 */
-// I AM NOT DONE
 
-fn sort<T>(array: &mut [T]){
-	//TODO
+fn sort<T>(array: &mut [T])
+where T: PartialOrd {
+    if array.len() < 2 {
+        return;
+    }
+
+    let mut smaller_ptr = 0;
+    for i in 1..array.len() {
+        if array[i] < array[0] {
+            smaller_ptr += 1;
+            array.swap(i, smaller_ptr);
+        }
+    }
+    array.swap(0, smaller_ptr);
+    sort(&mut array[1..=smaller_ptr]);
+    sort(&mut array[smaller_ptr + 1..]);
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
